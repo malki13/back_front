@@ -1,0 +1,61 @@
+# Docker Compose file Reference (https://docs.docker.com/compose/compose-file/)
+version: '3'
+
+#Define services
+services:
+  angular-service:
+    image: 'back_ing2_angular-service'
+    container_name: angular-service
+    build: ./vista
+    volumes:
+      - "/app/node_modules"
+      - './vista:/app'
+    ports:
+      - '4200:4200'
+  # dbc:
+  #   image: postgres:12
+  #   container_name: postgres12
+  #   restart: always
+  #   expose:
+  #     - "5432"
+  #   volumes:
+  #     - db_data:/var/lib/postgresql/data
+  #   environment:
+  #     - POSTGRES_PASSWORD=gitcd
+  #     - TZ=America/Guayaquil
+  spring:
+    build:
+      context: venta
+      dockerfile: Dockerfile
+    expose:
+      - "8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://dbc:5432/bd_registro
+      - SPRING_DATASOURCE_USERNAME=gitcd
+      - SPRING_DATASOURCE_PASSWORD=gitcd
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=create
+      - SPRING_JPA_GENERATE_DDL=true
+      - SPRING_MAIN_ALLOW_BEAN_DEFINITION_OVERRIDING=true
+      - SPRING_CLOUD_REFRESH_ENABLE=false
+      # spring.jpa.generate-ddl=true
+      # spring.jpa.hibernate.ddl-auto=create
+      # spring.cloud.refresh.enabled=false
+      # spring.main.allow-bean-definition-overriding=true
+    depends_on:
+      - dbc
+  dbc:
+    image: postgres:10.0
+    container_name: dbc
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=bd_registro
+      - POSTGRES_PASSWORD=gitcd
+      - POSTGRES_USER=gitcd
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - db-data:/var/lib/postgresql/data
+volumes:
+  db-data:
